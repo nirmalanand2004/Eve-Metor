@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eve Metor - Event Management</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --card: #ffffff;
+      --text: #1d2433;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --danger: #dc2626;
+      --ok: #16a34a;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .hidden { display: none !important; }
+    .muted { color: var(--muted); }
+    .small { font-size: 0.85rem; }
+
+    .brand {
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--primary);
+    }
+
+    h2 { margin-top: 0; }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      margin-bottom: 1.25rem;
+    }
+
+    .stack { display: flex; flex-direction: column; gap: 0.9rem; }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    input, select {
+      padding: 0.65rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: inherit;
+      font-weight: 400;
+    }
+
+    input:focus, select:focus {
+      outline: 2px solid var(--primary);
+      border-color: transparent;
+    }
+
+    .btn {
+      padding: 0.6rem 1rem;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .btn:hover { background: #f3f4f6; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .btn.primary:hover { background: var(--primary-dark); }
+    .btn.danger { color: var(--danger); }
+    .btn.small { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
+
+    .message { min-height: 1.2rem; margin: 0.75rem 0 0; font-size: 0.95rem; }
+    .message.success { color: var(--ok); }
+    .message.error { color: var(--danger); }
+
+    .banner {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    .switch { text-align: center; margin: 0; font-size: 0.9rem; }
+    .switch a { color: var(--primary); }
+
+    .auth-wrap {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+    }
+    .auth-card { width: min(420px, 100%); }
+    .auth-card h1 { text-align: center; margin-bottom: 0.25rem; }
+    .auth-card > p.muted { text-align: center; margin-top: 0; }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    }
+    .topbar .brand { font-size: 1.4rem; }
+
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      background: var(--bg);
+      padding: 0.3rem;
+      border-radius: 999px;
+      margin: 0 auto;
+    }
+    .tab {
+      border: 0;
+      background: transparent;
+      padding: 0.5rem 1.1rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .tab.active { background: var(--primary); color: #fff; }
+
+    .user-box {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 600;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 1.5rem auto;
+      padding: 0 1rem;
+    }
+
+    .slot { display: flex; align-items: center; gap: 0.5rem; }
+    .slot-no { width: 2rem; font-weight: 700; color: var(--muted); }
+    .slot .slot-input { flex: 1; }
+
+    .event-item {
+      border-top: 1px solid var(--border);
+      padding: 0.75rem 0;
+    }
+    .event-item ul {
+      margin: 0.4rem 0 0;
+      padding-left: 1.2rem;
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: var(--primary);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-left: 0.3rem;
+    }
+
+    .att-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+    .att-header h3 { margin: 0; }
+
+    .att-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .att-name { font-weight: 600; }
+
+    .radio-group { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+    .radio {
+      flex-direction: row;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .radio.present { color: var(--ok); }
+    .radio.absent { color: #b45309; }
+    .radio.disqualified { color: var(--danger); }
+    .radio:has(input:checked).present { background: #dcfce7; border-color: var(--ok); }
+    .radio:has(input:checked).absent { background: #fef3c7; border-color: #b45309; }
+    .radio:has(input:checked).disqualified { background: #fee2e2; border-color: var(--danger); }
+
+    #save-attendance { margin-top: 1rem; }
+
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 600px) {
+      .topbar { padding: 1rem; }
+      .tabs { width: 100%; justify-content: center; }
+      .user-box { width: 100%; justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+  <section id="auth-view" class="auth-wrap">
+    <div class="card auth-card">
+      <h1 class="brand">Eve Metor</h1>
+      <p class="muted">Event management</p>
+
+      <form id="login-form" class="stack">
+        <h2>Login</h2>
+        <label>Username
+          <input id="login-username" required autocomplete="username">
+        </label>
+        <label>Password
+          <input id="login-password" type="password" required autocomplete="current-password">
+        </label>
+        <button type="submit" class="btn primary">Login</button>
+        <p class="switch">No account? <a href="#" id="show-register">Register</a></p>
+      </form>
+
+      <form id="register-form" class="stack hidden">
+        <h2>Create account</h2>
+        <label>Username (min 3 characters)
+          <input id="reg-username" required minlength="3" autocomplete="username">
+        </label>
+        <label>Password (min 6 characters)
+          <input id="reg-password" type="password" required minlength="6" autocomplete="new-password">
+        </label>
+        <label>Confirm password
+          <input id="reg-confirm" type="password" required minlength="6" autocomplete="new-password">
+        </label>
+        <button type="submit" class="btn primary">Register</button>
+        <p class="switch">Already registered? <a href="#" id="show-login">Login</a></p>
+      </form>
+
+      <p id="auth-message" class="message"></p>
+    </div>
+  </section>
+
+  <section id="app-view" class="hidden">
+    <header class="topbar">
+      <h1 class="brand">Eve Metor</h1>
+
+      <nav class="tabs">
+        <button class="tab active" data-tab="register">Register Event</button>
+        <button class="tab" data-tab="attendance">Attendance</button>
+      </nav>
+
+      <div class="user-box">
+        <span id="current-user"></span>
+        <button id="logout-btn" class="btn small">Logout</button>
+      </div>
+    </header>
+
+    <div id="config-banner" class="banner hidden">
+      Supabase is not configured yet. Edit <code>config.js</code> with your project URL and anon key.
+    </div>
+
+    <main>
+      <section id="tab-register" class="tab-panel">
+        <div class="card">
+          <h2>Register an event</h2>
+          <form id="event-form" class="stack">
+            <label>Event name
+              <input id="event-name" placeholder="e.g. Chess Championship" required>
+            </label>
+
+            <label>Type
+              <select id="event-type">
+                <option value="solo">Solo</option>
+                <option value="group">Group</option>
+              </select>
+            </label>
+
+            <div id="solo-box">
+              <label>Participant name
+                <input id="solo-name" placeholder="Full name">
+              </label>
+            </div>
+
+            <div id="group-box" class="hidden">
+              <div id="group-slots" class="stack"></div>
+              <button type="button" id="add-slot" class="btn">+ Add participant</button>
+              <p class="muted small">A group starts with 2 participants. A group needs at least 2.</p>
+            </div>
+
+            <button type="submit" class="btn primary">Register</button>
+          </form>
+          <p id="register-message" class="message"></p>
+        </div>
+
+        <div class="card">
+          <h2>Registered events</h2>
+          <div id="registered-list"></div>
+        </div>
+      </section>
+
+      <section id="tab-attendance" class="tab-panel hidden">
+        <div class="card">
+          <h2>Attendance</h2>
+          <label>Select event
+            <select id="attendance-event"></select>
+          </label>
+
+          <div id="attendance-list" class="stack"></div>
+          <button id="save-attendance" class="btn primary hidden">Save attendance</button>
+          <p id="attendance-message" class="message"></p>
+        </div>
+
+        <div class="card">
+          <h2>Download data</h2>
+          <div class="download-grid">
+            <button class="btn" data-download="registered-csv">Registered - CSV</button>
+            <button class="btn" data-download="registered-xlsx">Registered - Excel</button>
+            <button class="btn" data-download="attendance-csv">Attendance - CSV</button>
+            <button class="btn" data-download="attendance-xlsx">Attendance - Excel</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+    window.APP_CONFIG = {
+      SUPABASE_URL: 'https://moyqauzllvdohmpyskqb.supabase.co',
+      SUPABASE_ANON_KEY: 'sb_publishable_3fcK5W1FFmXbe52bL-d5Yw_8282ASX2'
+    };
+  </script>
+  <script>
+    (() => {
+      'use strict';
+
+      const USERS_KEY = 'eveMeter.users';
+      const SESSION_KEY = 'eveMeter.session';
+      const STATUSES = [
+        { value: 'present', label: 'Present' },
+        { value: 'absent', label: 'Absent' },
+        { value: 'disqualified', label: 'Disqualified' }
+      ];
+
+      const $ = (id) => document.getElementById(id);
+      const show = (el) => el.classList.remove('hidden');
+      const hide = (el) => el.classList.add('hidden');
+
+      function msg(id, text, type = 'info') {
+        const el = $(id);
+        el.textContent = text;
+        el.className = `message ${type}`;
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, (c) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+      }
+
+      const statusLabel = (value) => STATUSES.find((s) => s.value === value)?.label ?? 'Not recorded';
+
+      const cfg = window.APP_CONFIG || {};
+      const isConfigured =
+        cfg.SUPABASE_URL && !cfg.SUPABASE_URL.includes('YOUR-PROJECT') &&
+        cfg.SUPABASE_ANON_KEY && !cfg.SUPABASE_ANON_KEY.includes('YOUR-ANON-KEY');
+
+      const db = isConfigured ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
+
+      const getUsers = () => JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+      const saveUsers = (users) => localStorage.setItem(USERS_KEY, JSON.stringify(users));
+      let session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+
+      async function sha256(text) {
+        const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+        return Array.from(new Uint8Array(buffer), (b) => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      function showLoginForm() {
+        show($('login-form'));
+        hide($('register-form'));
+        msg('auth-message', '');
+      }
+
+      function showRegisterForm() {
+        hide($('login-form'));
+        show($('register-form'));
+        msg('auth-message', '');
+      }
+
+      $('show-register').addEventListener('click', (e) => { e.preventDefault(); showRegisterForm(); });
+      $('show-login').addEventListener('click', (e) => { e.preventDefault(); showLoginForm(); });
+
+      $('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = $('reg-username').value.trim().toLowerCase();
+        const password = $('reg-password').value;
+        const confirm = $('reg-confirm').value;
+
+        if (password !== confirm) return msg('auth-message', 'Passwords do not match.', 'error');
+
+        const users = getUsers();
+        if (users.some((u) => u.username === username)) {
+          return msg('auth-message', 'That username is already taken.', 'error');
+        }
+
+        users.push({ username, passwordHash: await sha256(password), createdAt: new Date().toISOString() });
+        saveUsers(users);
+
+        e.target.reset();
+        showLoginForm();
+        msg('auth-message', 'Account created. Please log in.', 'success');
+      });
+
+      $('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = $('login-username').value.trim().toLowerCase();
+        const hash = await sha256($('login-password').value);
+        const user = getUsers().find((u) => u.username === username);
+
+        if (!user || user.passwordHash !== hash) {
+          return msg('auth-message', 'Invalid username or password.', 'error');
+        }
+
+        session = { username };
+        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        e.target.reset();
+        enterApp();
+      });
+
+      $('logout-btn').addEventListener('click', () => {
+        localStorage.removeItem(SESSION_KEY);
+        session = null;
+        hide($('app-view'));
+        show($('auth-view'));
+        showLoginForm();
+      });
+
+      document.querySelectorAll('.tab').forEach((btn) => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+
+      function switchTab(name) {
+        document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
+        document.querySelectorAll('.tab-panel').forEach((p) => p.classList.toggle('hidden', p.id !== `tab-${name}`));
+      }
+
+      $('event-type').addEventListener('change', updateTypeView);
+      $('add-slot').addEventListener('click', () => addSlot());
+
+      function updateTypeView() {
+        const isGroup = $('event-type').value === 'group';
+        $('solo-box').classList.toggle('hidden', isGroup);
+        $('group-box').classList.toggle('hidden', !isGroup);
+        if (isGroup && $('group-slots').children.length === 0) {
+          addSlot();
+          addSlot();
+        }
+      }
+
+      function addSlot(value = '') {
+        const row = document.createElement('div');
+        row.className = 'slot';
+        row.innerHTML = `
+          <span class="slot-no"></span>
+          <input type="text" class="slot-input" placeholder="Participant name">
+          <button type="button" class="btn small danger remove-slot" title="Remove">&times;</button>`;
+        row.querySelector('.slot-input').value = value;
+
+        row.querySelector('.remove-slot').addEventListener('click', () => {
+          if ($('group-slots').children.length <= 2) {
+            return msg('register-message', 'A group needs at least 2 participants.', 'error');
+          }
+          row.remove();
+          renumberSlots();
+        });
+
+        $('group-slots').appendChild(row);
+        renumberSlots();
+      }
+
+      function renumberSlots() {
+        [...$('group-slots').children].forEach((row, i) => {
+          row.querySelector('.slot-no').textContent = `${i + 1}.`;
+        });
+      }
+
+      function resetEventForm() {
+        $('event-form').reset();
+        $('group-slots').innerHTML = '';
+        updateTypeView();
+      }
+
+      $('event-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!db) return msg('register-message', 'Supabase is not configured. Edit config.js first.', 'error');
+
+        const name = $('event-name').value.trim();
+        const type = $('event-type').value;
+        const names = type === 'solo'
+          ? [$('solo-name').value.trim()]
+          : [...document.querySelectorAll('.slot-input')].map((i) => i.value.trim());
+
+        if (!name) return msg('register-message', 'Please enter an event name.', 'error');
+        if (type === 'group' && names.length < 2) return msg('register-message', 'A group needs at least 2 participants.', 'error');
+        if (names.some((n) => !n)) return msg('register-message', 'Every participant needs a name.', 'error');
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+
+        try {
+          const { data: event, error: eventError } = await db
+            .from('events')
+            .insert({ name, type, owner: session.username })
+            .select()
+            .single();
+          if (eventError) throw eventError;
+
+          const participantRows = names.map((n, i) => ({ event_id: event.id, name: n, position: i + 1 }));
+          const { error: participantError } = await db.from('participants').insert(participantRows);
+          if (participantError) throw participantError;
+
+          resetEventForm();
+          msg('register-message', `"${name}" registered with ${names.length} participant(s).`, 'success');
+
+          await loadEvents();
+          $('attendance-event').value = event.id;
+          renderAttendance();
+          switchTab('attendance');
+        } catch (err) {
+          msg('register-message', 'Save failed: ' + err.message, 'error');
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+
+      let events = [];
+
+      async function loadEvents() {
+        if (!db) return;
+        const { data, error } = await db
+          .from('events')
+          .select('id, name, type, owner, created_at, participants(id, name, position, attendance(status, recorded_at))')
+          .order('created_at', { ascending: false });
+
+        if (error) return msg('attendance-message', 'Could not load events: ' + error.message, 'error');
+
+        events = data.map((ev) => ({
+          ...ev,
+          participants: (ev.participants || [])
+            .slice()
+            .sort((a, b) => a.position - b.position)
+            .map((p) => ({
+              ...p,
+              att: Array.isArray(p.attendance) ? p.attendance[0] || null : p.attendance || null
+            }))
+        }));
+
+        renderRegistered();
+        renderAttendanceSelect();
+      }
+
+      function renderRegistered() {
+        const box = $('registered-list');
+        if (!events.length) {
+          box.innerHTML = '<p class="muted">No events registered yet.</p>';
+          return;
+        }
+        box.innerHTML = events.map((ev) => `
+          <div class="event-item">
+            <strong>${escapeHtml(ev.name)}</strong>
+            <span class="badge">${escapeHtml(ev.type)}</span>
+            <ul>${ev.participants.map((p) => `<li>${escapeHtml(p.name)}</li>`).join('')}</ul>
+          </div>`).join('');
+      }
+
+      function renderAttendanceSelect() {
+        const select = $('attendance-event');
+        const current = select.value;
+        select.innerHTML = events.length
+          ? events.map((ev) => `<option value="${ev.id}">${escapeHtml(ev.name)} (${ev.type})</option>`).join('')
+          : '<option value="">No events yet</option>';
+        if (events.some((ev) => ev.id === current)) select.value = current;
+        renderAttendance();
+      }
+
+      function renderAttendance() {
+        const ev = events.find((e) => e.id === $('attendance-event').value);
+        const list = $('attendance-list');
+        const saveBtn = $('save-attendance');
+
+        if (!ev) {
+          list.innerHTML = '<p class="muted">Register an event to record attendance.</p>';
+          hide(saveBtn);
+          return;
+        }
+
+        list.innerHTML = `
+          <div class="att-header">
+            <h3>${escapeHtml(ev.name)}</h3>
+            <span class="badge">${ev.type === 'solo' ? 'Solo' : 'Group'}</span>
+          </div>
+          ${ev.participants.map((p) => `
+            <div class="att-row">
+              <span class="att-name">${escapeHtml(p.name)}</span>
+              <div class="radio-group">
+                ${STATUSES.map((s) => `
+                  <label class="radio ${s.value}">
+                    <input type="radio" name="att-${p.id}" value="${s.value}"
+                      ${p.att && p.att.status === s.value ? 'checked' : ''}>
+                    ${s.label}
+                  </label>`).join('')}
+              </div>
+            </div>`).join('')}`;
+
+        show(saveBtn);
+      }
+
+      $('attendance-event').addEventListener('change', renderAttendance);
+
+      $('save-attendance').addEventListener('click', async () => {
+        if (!db) return msg('attendance-message', 'Supabase is not configured.', 'error');
+        const ev = events.find((e) => e.id === $('attendance-event').value);
+        if (!ev) return;
+
+        const rows = [];
+        for (const p of ev.participants) {
+          const checked = document.querySelector(`input[name="att-${p.id}"]:checked`);
+          if (!checked) return msg('attendance-message', `Please choose a status for ${p.name}.`, 'error');
+          rows.push({
+            event_id: ev.id,
+            participant_id: p.id,
+            status: checked.value,
+            recorded_at: new Date().toISOString()
+          });
+        }
+
+        const { error } = await db.from('attendance').upsert(rows, { onConflict: 'participant_id' });
+        if (error) return msg('attendance-message', 'Save failed: ' + error.message, 'error');
+
+        msg('attendance-message', 'Attendance saved to the database.', 'success');
+        await loadEvents();
+      });
+
+      function buildRegisteredRows() {
+        const rows = [['Event', 'Event Type', 'Participant', 'Position', 'Registered By', 'Registered At']];
+        events.forEach((ev) => {
+          ev.participants.forEach((p) => {
+            rows.push([ev.name, ev.type, p.name, p.position, ev.owner, ev.created_at]);
+          });
+        });
+        return rows;
+      }
+
+      function buildAttendanceRows() {
+        const rows = [['Event', 'Event Type', 'Participant', 'Attendance', 'Recorded At']];
+        events.forEach((ev) => {
+          ev.participants.forEach((p) => {
+            rows.push([
+              ev.name,
+              ev.type,
+              p.name,
+              p.att ? statusLabel(p.att.status) : 'Not recorded',
+              p.att ? p.att.recorded_at : ''
+            ]);
+          });
+        });
+        return rows;
+      }
+
+      function saveBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      function downloadCSV(rows, filename) {
+        const csv = rows
+          .map((row) => row.map((cell) => {
+            const text = String(cell ?? '');
+            return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+          }).join(','))
+          .join('\r\n');
+        saveBlob(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' }), filename);
+      }
+
+      function downloadExcel(rows, filename, sheetName) {
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(rows), sheetName);
+        XLSX.writeFile(workbook, filename);
+      }
+
+      document.querySelectorAll('[data-download]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          if (!db) return msg('attendance-message', 'Supabase is not configured.', 'error');
+          await loadEvents();
+          if (!events.length) return msg('attendance-message', 'There is no data to download yet.', 'error');
+
+          const stamp = new Date().toISOString().slice(0, 10);
+          switch (btn.dataset.download) {
+            case 'registered-csv':
+              downloadCSV(buildRegisteredRows(), `eve-metor-registered-${stamp}.csv`);
+              break;
+            case 'registered-xlsx':
+              downloadExcel(buildRegisteredRows(), `eve-metor-registered-${stamp}.xlsx`, 'Registered');
+              break;
+            case 'attendance-csv':
+              downloadCSV(buildAttendanceRows(), `eve-metor-attendance-${stamp}.csv`);
+              break;
+            case 'attendance-xlsx':
+              downloadExcel(buildAttendanceRows(), `eve-metor-attendance-${stamp}.xlsx`, 'Attendance');
+              break;
+          }
+        });
+      });
+
+      async function enterApp() {
+        hide($('auth-view'));
+        show($('app-view'));
+        $('current-user').textContent = `Signed in as ${session.username}`;
+        updateTypeView();
+
+        if (!db) return show($('config-banner'));
+        await loadEvents();
+      }
+
+      if (session) {
+        enterApp();
+      } else {
+        showLoginForm();
+      }
+    })();
+  </script>
+</body>
+</html>
